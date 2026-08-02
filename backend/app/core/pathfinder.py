@@ -40,37 +40,50 @@ def get_neighbors(cell, grid):
     return neighbours
 
 def astar(grid, start, goal):
-    # TODO:
-    # 1. open list -> priority queue, push (f, start), start with g=0
-    # 2. g_scores -> dict, {start: 0}
-    # 3. parents -> dict, empty for now
-    # 4. closed_set -> empty set
-    #
-    # loop while open list isn't empty:
-    #   - pop lowest-f cell -> current
-    #   - if current == goal: reconstruct path and return it
-    #   - add current to closed_set
-    #   - for each neighbor of current:
-    #       - skip if blocked or in closed_set
-    #       - tentative_g = g_scores[current] + 1  (cost of one step)
-    #       - if neighbor not in g_scores OR tentative_g < g_scores[neighbor]:
-    #           - update g_scores[neighbor], parents[neighbor] = current
-    #           - push (tentative_g + heuristic(neighbor, goal), neighbor) to open list
-    #
-    # if loop ends without finding goal: no path exists, return None
-    pass
+    open_list = []
+    heapq.heappush(open_list, (heuristic(start, goal), start))
+
+    g_scores = {start: 0}
+    parents = {}
+    closed_set = set()
+
+    while open_list:
+        current_f, current = heapq.heappop(open_list)
+
+        if current == goal:
+            return reconstruct_path(parents, current)
+
+        if current in closed_set:
+            continue
+
+        closed_set.add(current)
+
+        for neighbour in get_neighbors(current, grid):
+            if neighbour in closed_set:
+                continue
+
+            tentative_g = g_scores[current] + 1
+
+            if neighbour not in g_scores or tentative_g < g_scores[neighbour]:
+                g_scores[neighbour] = tentative_g
+                parents[neighbour] = current
+                f_score = tentative_g + heuristic(neighbour, goal)
+                heapq.heappush(open_list, (f_score, neighbour))
+
+    return None
 
 def reconstruct_path(parents, current):
-    # TODO: walk backward through parents dict from current to start,
-    # then reverse the resulting list
-    pass
-
-
+    path = [current]
+    while current in parents:
+        current = parents[current]
+        path.append(current)
+    path.reverse()
+    return path
+        
 if __name__ == "__main__":
     test_grid = [
         [0, 0, 0],
         [0, 1, 0],
         [0, 0, 0]
     ]
-    print(get_neighbors((1, 0), test_grid))
-    print(heuristic((0, 0), (2, 2)))
+    print(astar(test_grid, (0, 0), (2, 2)))
