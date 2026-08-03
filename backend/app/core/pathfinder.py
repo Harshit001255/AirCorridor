@@ -1,41 +1,38 @@
 import heapq
 
 def heuristic(cell, goal):
-    row_of_cell = cell[0]
-    row_of_goal = goal[0]
-    col_of_cell = cell[1]
-    col_of_goal = goal[1]
-    distance = abs(row_of_cell - row_of_goal) + abs(col_of_cell - col_of_goal)
+    row_of_cell, col_of_cell, alt_of_cell = cell[0], cell[1], cell[2]
+    row_of_goal, col_of_goal, alt_of_goal = goal[0], goal[1], goal[2]
+    distance = (
+        abs(row_of_cell - row_of_goal) 
+        + abs(col_of_cell - col_of_goal)
+        + abs(alt_of_cell - alt_of_goal)
+    )
 
     return distance
 
 def get_neighbors(cell, grid):
-    row = cell[0]
-    col = cell[1]
-    up = (row - 1, col)
-    down = (row + 1, col)
-    left = (row, col - 1)
-    right = (row, col + 1)
+    row, col, alt = cell[0], cell[1], cell[2]
+
+    up = (row - 1, col, alt)
+    down = (row + 1, col, alt)
+    left = (row, col - 1, alt)
+    right = (row, col + 1, alt)
+    ascend = (row, col, alt + 1)
+    descend = (row, col, alt - 1)
 
     no_of_rows = len(grid)
-    no_of_col = len(grid[0])  
+    no_of_col = len(grid[0])
+    no_of_alt = len(grid[0][0])
 
+    directions = [up, down,left, right, ascend, descend]
     neighbours = []
-    if 0<= up[0] < no_of_rows and 0<= up[1] < no_of_col:
-        if grid[up[0]][up[1]] == 0:
-            neighbours.append(up)
 
-    if 0<= down[0] < no_of_rows and 0<= down[1] < no_of_col:
-            if grid[down[0]][down[1]] == 0:
-                neighbours.append(down)
-
-    if 0<= left[0] < no_of_rows and 0<= left[1] < no_of_col:
-            if grid[left[0]][left[1]] == 0:
-                neighbours.append(left)
-
-    if 0<= right[0] < no_of_rows and 0<= right[1] < no_of_col:
-            if grid[right[0]][right[1]] == 0:
-                neighbours.append(right)
+    for d in directions:
+        d_row, d_col, d_alt = d[0], d[1], d[2]
+        if 0 <= d_row < no_of_rows and 0 <= d_col < no_of_col and 0 <= d_alt < no_of_alt:
+            if grid[d_row][d_col][d_alt] == 0:
+                neighbours.append(d)
 
     return neighbours
 
@@ -81,9 +78,8 @@ def reconstruct_path(parents, current):
     return path
         
 if __name__ == "__main__":
-    test_grid = [
-        [0, 0, 0],
-        [0, 1, 0],
-        [0, 0, 0]
+    test_grid_3d = [
+    [[0, 0], [0, 0]],
+    [[0, 1], [0, 0]]
     ]
-    print(astar(test_grid, (0, 0), (2, 2)))
+    print(astar(test_grid_3d, (0, 0, 0), (1, 1, 1)))
