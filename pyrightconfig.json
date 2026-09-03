@@ -1,0 +1,9 @@
+{
+  "extraPaths": [
+    "./backend/app/core",
+    "./backend/app/engine",
+    "./backend/app/api",
+    "./backend/app/models",
+    "./backend/app/simulation"
+  ]
+}
