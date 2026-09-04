@@ -1,7 +1,3 @@
-"""
-[... your original docstring, unchanged ...]
-"""
-
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import ValidationError
 
