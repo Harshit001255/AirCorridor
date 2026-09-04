@@ -27,7 +27,12 @@ export default function CityGrid() {
             {buildings.map((bldg) => (
                 <mesh key={bldg.id} position={[bldg.x, bldg.height / 2 - 0.5, bldg.z]}>
                     <boxGeometry args={[1, bldg.height, 1]} />
-                    <meshStandardMaterial color="#88aacc" />
+                    {/* This creates a dark, highly reflective surface similar to the liquid metal in your pitch deck */}
+                    <meshStandardMaterial
+                        color="#0a0f1d"
+                        metalness={0.85}
+                        roughness={0.15}
+                    />
                 </mesh>
             ))}
         </group>

@@ -1,5 +1,7 @@
 import { io } from 'socket.io-client';
-const BACKEND_URL = 'http://localhost:5000';
+
+// Updated to port 8000 to match Uvicorn!
+const BACKEND_URL = 'http://localhost:8000';
 
 export const socket = io(BACKEND_URL, {
     autoConnect: true,

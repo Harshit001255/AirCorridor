@@ -9,4 +9,4 @@ router = APIRouter()
 
 @router.post("/plan")
 def plan(request: PlanRequest):
-    return plan_path(TEST_GRID, request.start, request.goal)
+    return plan_path(TEST_GRID, request.start, request.goal)
