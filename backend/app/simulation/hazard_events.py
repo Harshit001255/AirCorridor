@@ -4,7 +4,7 @@ import uuid
 from fastapi import APIRouter
 
 from app.models.schemas import PlanRequest
-from app.engine.planner_service import replan_path
+from app.engine.planner_service import plan_path, replan_path
 from app.api.ws_live import manager
 from app.config import TEST_GRID
 
@@ -54,7 +54,8 @@ async def trigger_hazard(request: PlanRequest) -> dict:
 
     new_path = replan_path(TEST_GRID, request.start, request.goal, new_obstacles)
 
-    await manager.broadcast(new_path)
+    if new_path["success"]:
+        await manager.broadcast(new_path)
 
     return {
         "hazard": hazard,
