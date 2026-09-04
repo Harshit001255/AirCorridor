@@ -9,6 +9,12 @@ def plan_path(grid, start, goal):
     start_tuple = tuple(start)
     goal_tuple = tuple(goal)
 
+    # Automatically pad 2D coordinates to 3D if altitude is omitted
+    if len(start_tuple) == 2:
+        start_tuple = (start_tuple[0], start_tuple[1], 0)
+    if len(goal_tuple) == 2:
+        goal_tuple = (goal_tuple[0], goal_tuple[1], 0)
+
     path = astar(grid, start_tuple, goal_tuple)
 
     if path is None:

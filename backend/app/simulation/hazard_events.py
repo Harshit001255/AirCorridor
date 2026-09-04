@@ -31,27 +31,16 @@ def hazard_cells_from_center(center, radius, grid):
 
 @router.post("/trigger-hazard")
 async def trigger_hazard(request: PlanRequest) -> dict:
-    if request.start == request.goal:
-        return {
-            "hazard": None,
-            "new_path": {
-                "success": False,
-                "path": None,
-                "path_length": 0,
-                "message": "Drone is already at the goal — nothing to replan."
-            }
-        }
-    current_plan = plan_path(TEST_GRID, request.start, request.goal)
-
-    if not current_plan["success"]:
-        return {
-            "hazard": None,
-            "new_path": current_plan
-        }
-
-    path = current_plan["path"]
-    midpoint_index = len(path) // 2
-    hazard_center = tuple(path[midpoint_index])
+    if getattr(request, "hazard_position", None):
+        hazard_center = tuple(request.hazard_position)
+    else:
+        start_row, start_col, start_alt = request.start
+        goal_row, goal_col, goal_alt = request.goal
+        hazard_center = (
+            (start_row + goal_row) // 2,
+            (start_col + goal_col) // 2,
+            (start_alt + goal_alt) // 2,
+        )
 
     new_obstacles = hazard_cells_from_center(hazard_center, radius=1, grid=TEST_GRID)
 
