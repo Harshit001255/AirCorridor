@@ -31,7 +31,7 @@ def hazard_cells_from_center(center, radius, grid):
 
 @router.post("/trigger-hazard")
 async def trigger_hazard(request: PlanRequest) -> dict:
-    if getattr(request, "hazard_position", None):
+    if request.hazard_position is not None:
         hazard_center = tuple(request.hazard_position)
     else:
         start_row, start_col, start_alt = request.start
@@ -42,26 +42,66 @@ async def trigger_hazard(request: PlanRequest) -> dict:
             (start_alt + goal_alt) // 2,
         )
 
-    new_obstacles = hazard_cells_from_center(hazard_center, radius=1, grid=TEST_GRID)
+    # Use radius=0 for exact single-cell obstacle placement on 3D grid
+    new_obstacles = hazard_cells_from_center(hazard_center, radius=0, grid=TEST_GRID)
 
     hazard = {
         "id": str(uuid.uuid4()),
         "center": list(hazard_center),
-        "radius": 1,
+        "radius": 0,
         "triggered_at": time.time(),
     }
     active_hazards.append(hazard)
 
-    new_path = replan_path(TEST_GRID, request.start, request.goal, new_obstacles)
+    # Collect all active hazard cells
+    all_hazard_cells = set()
+    for h in active_hazards:
+        h_center = tuple(h["center"])
+        h_rad = h.get("radius", 0)
+        for cell in hazard_cells_from_center(h_center, radius=h_rad, grid=TEST_GRID):
+            all_hazard_cells.add(cell)
 
-    await manager.broadcast(new_path)
+    new_path = replan_path(TEST_GRID, request.start, request.goal, list(all_hazard_cells))
+
+    broadcast_data = {
+        "type": "HAZARD_TRIGGERED",
+        "hazard": hazard,
+        "active_hazards": list(active_hazards),
+        "success": new_path.get("success", False),
+        "path": new_path.get("path"),
+        "path_length": new_path.get("path_length", 0),
+        "message": new_path.get("message", "")
+    }
+
+    await manager.broadcast(broadcast_data)
 
     return {
         "hazard": hazard,
+        "active_hazards": active_hazards,
         "new_path": new_path,
+    }
+
+
+@router.post("/clear-hazards")
+async def clear_hazards(request: PlanRequest) -> dict:
+    active_hazards.clear()
+    cleared_path = replan_path(TEST_GRID, request.start, request.goal, [])
+    broadcast_data = {
+        "type": "HAZARDS_CLEARED",
+        "hazard": None,
+        "active_hazards": [],
+        "success": cleared_path.get("success", False),
+        "path": cleared_path.get("path"),
+        "path_length": cleared_path.get("path_length", 0),
+        "message": "All hazards cleared. Reverted to optimal path."
+    }
+    await manager.broadcast(broadcast_data)
+    return {
+        "message": "All hazards cleared",
+        "new_path": cleared_path,
     }
 
 
 @router.get("/hazards")
 def list_hazards() -> list[dict]:
-    return active_hazards
+    return active_hazards

@@ -1,8 +1,10 @@
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'core'))
-
-from pathfinder import astar
+try:
+    from app.core.pathfinder import astar
+except ImportError:
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'core'))
+    from pathfinder import astar  # type: ignore
 
 
 def plan_path(grid, start, goal):
