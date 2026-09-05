@@ -31,7 +31,7 @@ def hazard_cells_from_center(center, radius, grid):
 
 @router.post("/trigger-hazard")
 async def trigger_hazard(request: PlanRequest) -> dict:
-    if request.hazard_position is not None:
+    if getattr(request, "hazard_position", None) is not None:
         hazard_center = tuple(request.hazard_position)
     else:
         start_row, start_col, start_alt = request.start
@@ -104,4 +104,4 @@ async def clear_hazards(request: PlanRequest) -> dict:
 
 @router.get("/hazards")
 def list_hazards() -> list[dict]:
-    return active_hazards
+    return active_hazards
