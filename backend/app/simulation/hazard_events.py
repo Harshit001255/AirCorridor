@@ -14,7 +14,6 @@ active_hazards: list[dict] = []
 
 
 def hazard_cells_from_center(center, radius, grid):
-    """Returns every grid cell within `radius` steps of `center`, in bounds."""
     row_c, col_c, alt_c = center
     no_of_rows = len(grid)
     no_of_col = len(grid[0])
